@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>appy — CachyOS / Arch Service Installer & Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0C0E;--s:#131318;--s2:#18181F;--b:#1E1E28;--b2:#2A2A38;
+  --g:#3DD68C;--gd:#27A86B;--a:#E8A838;--bl:#5B9CF6;--r:#F06B6B;
+  --pu:#A78BFA;--cy:#22D3EE;
+  --t:#F0F0F4;--m:#8A8A9A;--d:#4A4A5A;
+  --ui:Inter,system-ui,sans-serif;--co:'JetBrains Mono',Consolas,monospace;--rr:6px
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t);font-family:var(--ui);font-size:15px;font-weight:400;line-height:1.6;-webkit-font-smoothing:antialiased}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;height:54px;background:rgba(12,12,14,.94);backdrop-filter:blur(24px);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 40px;z-index:100;gap:0}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:auto}
+.logo-mark{width:28px;height:28px;background:var(--g);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--co);font-size:13px;font-weight:500;color:#0C0C0E}
+.logo-name{font-size:15px;font-weight:700;color:var(--t);letter-spacing:-0.02em}
+.logo-name span{color:var(--m);font-weight:400}
+.logo-ver{font-size:10px;font-weight:600;background:rgba(61,214,140,.15);color:var(--g);border:1px solid rgba(61,214,140,.25);border-radius:10px;padding:1px 7px;margin-left:6px;letter-spacing:.04em}
+.nav-links{display:flex;gap:2px;list-style:none}
+.nav-links a{padding:6px 11px;border-radius:var(--rr);color:var(--m);text-decoration:none;font-size:13px;font-weight:500;transition:color .15s,background .15s}
+.nav-links a:hover{color:var(--t);background:rgba(255,255,255,.05)}
+.nav-gh{margin-left:10px;display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--b2);border-radius:var(--rr);color:var(--m);text-decoration:none;font-size:13px;font-weight:500;transition:all .15s}
+.nav-gh:hover{border-color:var(--g);color:var(--g)}
+.page{padding-top:54px}
+.wrap{max-width:1060px;margin:0 auto;padding:0 40px}
+h1{font-size:clamp(32px,4.5vw,56px);font-weight:700;letter-spacing:-0.03em;line-height:1.07;color:var(--t)}
+h2{font-size:clamp(22px,2.8vw,34px);font-weight:600;letter-spacing:-0.025em;line-height:1.2;color:var(--t)}
+h3{font-size:16px;font-weight:600;color:var(--t)}
+p{color:var(--m);line-height:1.7}
+.ey{font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--g);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.ey::before{content:'//';color:var(--d);font-weight:300;letter-spacing:0}
+hr{border:none;border-top:1px solid var(--b)}
+section{padding:80px 0}
+
+/* HERO */
+.hero{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:96px 40px 80px;max-width:1060px;margin:0 auto}
+.hero-l{display:flex;flex-direction:column;gap:22px}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border:1px solid var(--b2);border-radius:20px;font-size:12px;color:var(--m);background:var(--s);width:fit-content}
+.bdot{width:6px;height:6px;border-radius:50%;background:var(--g);animation:pulse 2s ease infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hl{color:var(--g)}
+.hero-sub{font-size:16px;color:var(--m);line-height:1.75;max-width:420px}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:11px 22px;border-radius:var(--rr);font-family:var(--ui);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .15s;border:none}
+.btn-p{background:var(--g);color:#0C0C0E}.btn-p:hover{background:var(--gd);transform:translateY(-1px)}
+.btn-g{background:none;border:1px solid var(--b2);color:var(--m)}.btn-g:hover{border-color:var(--t);color:var(--t)}
+.stats{display:flex;padding-top:20px;border-top:1px solid var(--b);gap:0}
+.stat{flex:1}
+.stat strong{display:block;font-size:22px;font-weight:600;color:var(--t);letter-spacing:-0.03em;line-height:1}
+.stat span{font-size:12px;color:var(--d);margin-top:4px;display:block}
+
+/* TERMINAL */
+.term{background:#07070E;border:1px solid var(--b);border-radius:10px;overflow:hidden;font-family:var(--co);box-shadow:0 28px 70px rgba(0,0,0,.7)}
+.tbar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--s);border-bottom:1px solid var(--b)}
+.dot{width:11px;height:11px;border-radius:50%}
+.dr{background:#FF5F57}.dy{background:#FEBC2E}.dg{background:#28C840}
+.ttitle{margin-left:8px;font-size:11px;color:var(--d);font-family:var(--ui);flex:1;text-align:center}
+.tbody{padding:18px 20px;font-size:12.5px;line-height:1.9}
+.ps{color:var(--g);user-select:none;margin-right:8px}
+.t-dim{color:#555}
+.t-grp{color:var(--bl);font-size:11px}
+
+/* INSTALL BOX */
+.ibox{margin-top:14px;display:flex;align-items:center;gap:10px;background:rgba(61,214,140,.04);border:1px solid rgba(61,214,140,.15);border-radius:var(--rr);padding:12px 14px;cursor:pointer;transition:all .15s}
+.ibox:hover{background:rgba(61,214,140,.09);border-color:rgba(61,214,140,.3)}
+.ibox code{font-family:var(--co);font-size:13px;font-weight:500;color:var(--t);flex:1}
+.copy-btn{background:none;border:1px solid var(--b2);color:var(--m);font-family:var(--ui);font-size:11px;font-weight:600;padding:5px 12px;border-radius:var(--rr);cursor:pointer;transition:all .15s;white-space:nowrap;letter-spacing:.05em}
+.copy-btn:hover{border-color:var(--g);color:var(--g)}
+.copy-btn.ok{border-color:var(--g);color:var(--g);background:rgba(61,214,140,.08)}
+
+/* STRIP */
+.strip{border-top:1px solid var(--b);border-bottom:1px solid var(--b);padding:16px 40px;display:flex;justify-content:center;gap:36px;flex-wrap:wrap}
+.si{font-size:13px;color:var(--m);display:flex;align-items:center;gap:6px}
+.si .ok{color:var(--g)}
+
+/* HOW */
+.how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:28px}
+.hc{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:22px;transition:border-color .15s}
+.hc:hover{border-color:var(--b2)}
+.hn{font-size:32px;font-weight:300;color:var(--b2);letter-spacing:-0.04em;line-height:1;margin-bottom:10px}
+.hc h3{margin-bottom:8px;font-size:14px}
+.hc p{font-size:12.5px;line-height:1.65}
+
+/* FEATURES GRID */
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+.fc{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:22px;transition:border-color .15s}
+.fc:hover{border-color:var(--b2)}
+.fc-icon{width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:17px;margin-bottom:14px}
+.fi-g{background:rgba(61,214,140,.12)}
+.fi-b{background:rgba(91,156,246,.12)}
+.fi-a{background:rgba(232,168,56,.12)}
+.fi-p{background:rgba(167,139,250,.12)}
+.fi-c{background:rgba(34,211,238,.12)}
+.fi-r{background:rgba(240,107,107,.12)}
+.fc h3{font-size:14px;margin-bottom:7px}
+.fc p{font-size:12.5px;line-height:1.65}
+
+/* SERVICES */
+.svc-groups{display:flex;flex-direction:column;gap:32px;margin-top:28px}
+.sg-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--d);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b)}
+.svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:9px}
+.sc{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:15px 16px;transition:border-color .15s,background .15s}
+.sc:hover{border-color:var(--b2);background:var(--s2)}
+.sc-top{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.sc-name{font-size:13.5px;font-weight:600;color:var(--t);flex:1}
+.sc-port{font-family:var(--co);font-size:10px;color:var(--d);background:var(--bg);border:1px solid var(--b);border-radius:3px;padding:1px 5px}
+.sc-key{font-family:var(--co);font-size:10px;color:var(--d);background:var(--bg);border:1px solid var(--b);border-radius:3px;padding:1px 5px}
+.sc-desc{font-size:12px;color:var(--m);line-height:1.55;margin-bottom:8px}
+.sc-foot{display:flex;align-items:center;gap:6px}
+.sc-type{font-size:10px;font-weight:600;padding:2px 7px;border-radius:3px;letter-spacing:.03em}
+.tp{background:rgba(61,214,140,.1);color:var(--g);border:1px solid rgba(61,214,140,.2)}
+.ta{background:rgba(232,168,56,.1);color:var(--a);border:1px solid rgba(232,168,56,.2)}
+.tc2{background:rgba(91,156,246,.1);color:var(--bl);border:1px solid rgba(91,156,246,.2)}
+.td{background:rgba(167,139,250,.1);color:var(--pu);border:1px solid rgba(167,139,250,.2)}
+.sc-new{font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--cy);background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);border-radius:3px;padding:1px 6px}
+
+/* DAEMON SECTION */
+.daemon-layout{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:start;margin-top:28px}
+.daemon-features{display:flex;flex-direction:column;gap:12px}
+.df{display:flex;gap:14px;align-items:flex-start;background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:16px}
+.df-icon{font-size:18px;flex-shrink:0;width:32px;text-align:center;margin-top:1px}
+.df-text h4{font-size:13.5px;font-weight:600;color:var(--t);margin-bottom:4px}
+.df-text p{font-size:12px;line-height:1.6}
+
+/* CLI FLAGS */
+.flags-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:24px}
+.flag{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:14px 16px;display:flex;gap:12px;align-items:flex-start}
+.flag code{font-family:var(--co);font-size:12px;color:var(--g);white-space:nowrap;flex-shrink:0}
+.flag p{font-size:12px;line-height:1.55;margin:0}
+
+/* CODE BLOCKS */
+.cl{font-family:var(--co);font-size:12px;font-weight:500;background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:12px 14px;color:var(--t);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;word-break:break-all}
+.cb{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:14px;font-family:var(--co);font-size:12.5px;line-height:1.8;color:var(--t);margin-top:8px;overflow-x:auto}
+.cb .cm{color:var(--d)}
+.cb .kw{color:var(--bl)}
+.cb .str{color:var(--a)}
+.cb .val{color:var(--g)}
+
+/* DEPLOY */
+.ds{display:grid;grid-template-columns:52px 1fr;gap:20px;padding:26px 0;border-bottom:1px solid var(--b)}
+.ds:last-child{border-bottom:none}
+.dn{font-size:26px;font-weight:300;color:var(--b2);text-align:right;padding-top:4px}
+.ds h3{margin-bottom:6px}
+.ds p{font-size:13px;line-height:1.7;margin-bottom:8px}
+.ds code,.ds a{font-family:var(--co);color:var(--g);font-size:13px}
+.ds a{color:var(--bl);text-decoration:none}.ds a:hover{text-decoration:underline}
+.cfg{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:12px 14px;margin-top:8px;font-size:13px;display:grid;grid-template-columns:180px 1fr;gap:5px 14px}
+.cfg .k{color:var(--m)}.cfg .v{font-family:var(--co);color:var(--g)}
+.cfg .vd{font-family:var(--co);color:var(--d)}
+
+/* MAINTENANCE */
+.mg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
+.mc{background:var(--s);border:1px solid var(--b);border-radius:var(--rr);padding:20px;transition:border-color .15s}
+.mc:hover{border-color:var(--b2)}
+.mc h3{margin-bottom:6px;font-size:14px}
+.mc p{font-size:12.5px;line-height:1.6;margin-bottom:8px}
+.mc-cmd{font-family:var(--co);font-size:11.5px;color:var(--g)}
+
+/* FILE TABLE */
+.ftable{width:100%;border-collapse:collapse;margin-top:20px;font-size:13px}
+.ftable th{text-align:left;padding:8px 12px;color:var(--d);font-weight:600;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--b)}
+.ftable td{padding:9px 12px;border-bottom:1px solid rgba(30,30,40,.7);vertical-align:top}
+.ftable tr:last-child td{border-bottom:none}
+.ftable td:first-child{font-family:var(--co);font-size:11.5px;color:var(--g);white-space:nowrap}
+.ftable td:last-child{color:var(--m);font-size:12.5px}
+.ftable tr:hover td{background:var(--s)}
+
+/* FOOTER */
+footer{border-top:1px solid var(--b);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;max-width:1060px;margin:0 auto}
+footer p{font-size:13px;color:var(--d)}
+footer a{color:var(--d);text-decoration:none;font-weight:500;transition:color .15s}
+footer a:hover{color:var(--g)}
+#toast{position:fixed;bottom:24px;right:24px;background:var(--s);border:1px solid var(--gd);color:var(--g);padding:10px 18px;font-size:13px;font-weight:500;border-radius:var(--rr);opacity:0;transform:translateY(4px);transition:all .18s;pointer-events:none;z-index:9999}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;gap:40px;padding:72px 20px 56px}
+  .wrap,.strip{padding-left:20px;padding-right:20px}
+  .how-grid{grid-template-columns:1fr 1fr}
+  .feat-grid,.mg{grid-template-columns:1fr}
+  .daemon-layout,.flags-grid{grid-template-columns:1fr}
+  nav{padding:0 20px}
+  .hm{display:none}
+  footer{flex-direction:column;gap:8px;padding:24px 20px;text-align:center}
+}
+@media(max-width:540px){
+  .how-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="#top">
+    <span class="logo-mark">ap</span>
+    <span class="logo-name">appy<span>.sh</span></span>
+    <span class="logo-ver">v2.0</span>
+  </a>
+  <ul class="nav-links">
+    <li class="hm"><a href="#how">How It Works</a></li>
+    <li class="hm"><a href="#features">Features</a></li>
+    <li class="hm"><a href="#services">Services</a></li>
+    <li class="hm"><a href="#daemon">Daemon</a></li>
+    <li class="hm"><a href="#deploy">Deploy</a></li>
+    <li><a href="https://github.com/YOUR_USERNAME/appy" target="_blank" class="nav-gh"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .31.21.69.82.57C20.56 21.8 24 17.3 24 12 24 5.37 18.63 0 12 0z"/></svg> GitHub</a></li>
+  </ul>
+</nav>
+
+<div class="page" id="top">
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-l">
+    <div class="badge"><span class="bdot"></span> CachyOS &nbsp;/&nbsp; Arch Linux</div>
+    <h1>Install, monitor,<br><span class="hl">auto-manage.</span></h1>
+    <p class="hero-sub">37 services. Grouped menu. Built-in watchdog daemon that keeps everything running. One script — no flags, no config files.</p>
+    <div class="actions">
+      <button class="btn btn-p" onclick="cp('sudo bash appy.sh',this)">↓ Copy command</button>
+      <a class="btn btn-g" href="#services">See all services →</a>
+    </div>
+    <div class="stats">
+      <div class="stat"><strong>37</strong><span>services</span></div>
+      <div class="stat"><strong>watchdog</strong><span>built-in</span></div>
+      <div class="stat"><strong>0</strong><span>flags needed</span></div>
+    </div>
+  </div>
+  <div>
+    <div class="term">
+      <div class="tbar"><span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span><span class="ttitle">root@cachyos — bash</span></div>
+      <div class="tbody">
+        <div style="margin-bottom:10px"><span class="ps">$</span><span style="color:var(--t);font-weight:500">sudo bash appy.sh</span></div>
+        <div style="color:var(--g);font-weight:600;margin-bottom:8px;font-size:11px">   appy v2.0 — CachyOS Service Installer</div>
+        <div style="color:var(--d);margin-bottom:2px;font-size:11px">  watchdog: <span style="color:var(--g)">● running</span></div>
+        <div style="margin-bottom:8px"></div>
+        <div class="t-grp" style="margin-bottom:4px">  ── Containers &amp; Web ──────────────────</div>
+        <div style="color:var(--m);font-size:11.5px">&nbsp; <span style="color:var(--g)">✓</span>&nbsp;1) Docker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2) Nginx</div>
+        <div style="color:var(--m);font-size:11.5px">&nbsp;&nbsp;&nbsp;3) Caddy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;4) Portainer</div>
+        <div class="t-grp" style="margin:6px 0 4px">  ── Monitoring ──────────────────────────</div>
+        <div style="color:var(--m);font-size:11.5px">&nbsp;&nbsp;&nbsp;5) Netdata&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;6) Prometheus</div>
+        <div style="color:var(--m);font-size:11.5px">&nbsp;&nbsp;&nbsp;7) Grafana&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8) Uptime Kuma</div>
+        <div style="color:var(--m);font-size:11px">&nbsp;&nbsp;&nbsp;...</div>
+        <div style="color:var(--a);margin-top:8px;font-size:11.5px">  H) Health &nbsp; U) Update &nbsp; M) Maintenance</div>
+        <div style="color:var(--m);font-size:11.5px"><span class="ps">→</span><span style="color:var(--t);font-weight:500"> 1 3 6 7</span></div>
+      </div>
+    </div>
+    <div class="ibox" onclick="cp('sudo bash appy.sh',this.querySelector('.copy-btn'))">
+      <span style="font-family:var(--co);color:var(--g);user-select:none">$</span>
+      <code>sudo bash appy.sh</code>
+      <button class="copy-btn">COPY</button>
+    </div>
+  </div>
+</section>
+
+<div class="strip">
+  <div class="si"><span class="ok">✓</span> No flags required</div>
+  <div class="si"><span class="ok">✓</span> Auto-installs yay if missing</div>
+  <div class="si"><span class="ok">✓</span> Watchdog daemon built-in</div>
+  <div class="si"><span class="ok">✓</span> Auto-update scheduler</div>
+  <div class="si"><span class="ok">✓</span> Config backup &amp; rollback</div>
+  <div class="si"><span class="ok">✓</span> Health reports &amp; alerts</div>
+</div>
+
+<!-- HOW -->
+<section id="how">
+  <div class="wrap">
+    <div class="ey">how it works</div>
+    <h2>Four steps, then it manages itself.</h2>
+    <div class="how-grid">
+      <div class="hc"><div class="hn">1</div><h3>Download &amp; run</h3><p>Get <code style="font-family:var(--co);color:var(--g);font-size:12px">appy.sh</code> and run as root. No install, no deps, no config files.</p></div>
+      <div class="hc"><div class="hn">2</div><h3>Pick services</h3><p>Grouped menu. Type numbers space-separated. <code style="font-family:var(--co);color:var(--g);font-size:12px">A</code> for everything, <code style="font-family:var(--co);color:var(--g);font-size:12px">H</code> for health.</p></div>
+      <div class="hc"><div class="hn">3</div><h3>Services running</h3><p>Each service installs via pacman, yay, or docker. Enabled with systemd. No reboot needed.</p></div>
+      <div class="hc"><div class="hn">4</div><h3>Daemon watches</h3><p>Install the watchdog from <code style="font-family:var(--co);color:var(--g);font-size:12px">M → 7</code>. It auto-restarts failed services and alerts you of issues.</p></div>
+    </div>
+    <div class="cl" style="margin-top:24px">
+      <span>curl -fsSL https://YOUR-PROJECT.pages.dev/appy.sh -o appy.sh &amp;&amp; sudo bash appy.sh</span>
+      <button class="copy-btn" onclick="cp('curl -fsSL https://YOUR-PROJECT.pages.dev/appy.sh -o appy.sh && sudo bash appy.sh',this)">COPY</button>
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="wrap">
+    <div class="ey">new in v2.0</div>
+    <h2>Beyond installing — a full system manager.</h2>
+    <p style="margin-top:8px;max-width:560px">appy now monitors your system continuously, restarts failed services, schedules updates, and keeps your configs backed up.</p>
+    <div class="feat-grid">
+      <div class="fc">
+        <div class="fc-icon fi-g">🐕</div>
+        <h3>Watchdog Daemon</h3>
+        <p>Runs as a systemd service. Checks every 5 minutes, auto-restarts crashed services, and logs every event.</p>
+      </div>
+      <div class="fc">
+        <div class="fc-icon fi-b">📊</div>
+        <h3>Real-time Health Check</h3>
+        <p>CPU, memory, disk, load average, network interfaces, and per-service status in one color-coded report.</p>
+      </div>
+      <div class="fc">
+        <div class="fc-icon fi-a">🔄</div>
+        <h3>Auto-Update Scheduler</h3>
+        <p>systemd timer runs pacman, yay, and Docker image pulls automatically. Daily or weekly — your choice.</p>
+      </div>
+      <div class="fc">
+        <div class="fc-icon fi-p">💾</div>
+        <h3>Config Backup</h3>
+        <p>Archives configs for Nginx, Caddy, Prometheus, Grafana, UFW, WireGuard, and more. Keeps last 5 archives.</p>
+      </div>
+      <div class="fc">
+        <div class="fc-icon fi-c">↩</div>
+        <h3>Service Rollback</h3>
+        <p>Remove any installed service cleanly — stops, disables, and uninstalls. Docker containers included.</p>
+      </div>
+      <div class="fc">
+        <div class="fc-icon fi-r">🔔</div>
+        <h3>Notifications &amp; Alerts</h3>
+        <p>Disk &gt;90%, memory &gt;95%, service crashes, and pending updates logged and optionally emailed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="wrap">
+    <div class="ey">37 services</div>
+    <h2>Everything in one menu.</h2>
+    <p style="margin-top:8px;max-width:540px">
+      <span style="color:var(--g)">■ pacman</span> — official repos &nbsp;·&nbsp;
+      <span style="color:var(--a)">■ AUR</span> — Arch User Repo &nbsp;·&nbsp;
+      <span style="color:var(--bl)">■ curl</span> — official install script &nbsp;·&nbsp;
+      <span style="color:var(--pu)">■ docker</span> — container
+      &nbsp;·&nbsp; <span style="color:var(--cy)">NEW</span> — added in v2.0
+    </p>
+
+    <div class="svc-groups">
+
+      <!-- Containers -->
+      <div>
+        <div class="sg-label">Containers &amp; Web</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">Docker</span><span class="sc-key">docker</span></div><div class="sc-desc">Container runtime. Adds your user to docker group automatically.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Docker Compose</span><span class="sc-key">compose</span></div><div class="sc-desc">Define and run multi-container apps with a YAML file.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Nginx</span><span class="sc-key">nginx</span><span class="sc-port">:80</span></div><div class="sc-desc">High-performance web server and reverse proxy.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Caddy</span><span class="sc-key">caddy</span><span class="sc-port">:443</span></div><div class="sc-desc">Modern server with automatic HTTPS via Let's Encrypt.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Portainer</span><span class="sc-key">portainer</span><span class="sc-port">:9443</span></div><div class="sc-desc">Web UI for managing Docker containers, images, and volumes.</div><div class="sc-foot"><span class="sc-type td">docker</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- Databases -->
+      <div>
+        <div class="sg-label">Databases</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">MariaDB</span><span class="sc-key">mariadb</span><span class="sc-port">:3306</span></div><div class="sc-desc">MySQL-compatible DB. Root password auto-saved to credentials file.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">PostgreSQL</span><span class="sc-key">postgres</span><span class="sc-port">:5432</span></div><div class="sc-desc">Advanced relational database. Data dir initialized automatically.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Redis</span><span class="sc-key">redis</span><span class="sc-port">:6379</span></div><div class="sc-desc">In-memory cache and queue. Bound to localhost.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">SQLite</span><span class="sc-key">sqlite</span></div><div class="sc-desc">Embedded zero-config database. No server required.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">MongoDB</span><span class="sc-key">mongodb</span><span class="sc-port">:27017</span></div><div class="sc-desc">NoSQL document database from the Arch User Repository.</div><div class="sc-foot"><span class="sc-type ta">AUR</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- Security -->
+      <div>
+        <div class="sg-label">Security &amp; Networking</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">Fail2ban</span><span class="sc-key">fail2ban</span></div><div class="sc-desc">Bans IPs after repeated failed SSH attempts automatically.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">UFW</span><span class="sc-key">ufw</span></div><div class="sc-desc">Simple firewall. Auto-configured: deny inbound, allow SSH.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">WireGuard</span><span class="sc-key">wireguard</span></div><div class="sc-desc">Fast modern VPN. Configure at /etc/wireguard/ after install.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Tailscale</span><span class="sc-key">tailscale</span></div><div class="sc-desc">Zero-config mesh VPN. Run tailscale up to authenticate.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Vaultwarden</span><span class="sc-key">vaultwarden</span><span class="sc-port">:8222</span></div><div class="sc-desc">Self-hosted Bitwarden-compatible password manager. Admin token auto-saved.</div><div class="sc-foot"><span class="sc-type td">docker</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">CrowdSec</span><span class="sc-key">crowdsec</span></div><div class="sc-desc">Collaborative intrusion prevention. Auto-installs Linux + SSH collections.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- Media -->
+      <div>
+        <div class="sg-label">Media &amp; Files</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">Jellyfin</span><span class="sc-key">jellyfin</span><span class="sc-port">:8096</span></div><div class="sc-desc">Free open-source media server. Stream anywhere.</div><div class="sc-foot"><span class="sc-type ta">AUR</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Samba</span><span class="sc-key">samba</span><span class="sc-port">:445</span></div><div class="sc-desc">Windows-compatible file sharing across your network.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Syncthing</span><span class="sc-key">syncthing</span><span class="sc-port">:8384</span></div><div class="sc-desc">Continuous real-time file sync across all your devices.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- Monitoring -->
+      <div>
+        <div class="sg-label">Monitoring &amp; Observability</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">btop</span><span class="sc-key">btop</span></div><div class="sc-desc">Beautiful terminal resource monitor with graphs.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">htop</span><span class="sc-key">htop</span></div><div class="sc-desc">Classic interactive process viewer. Lightweight.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Netdata</span><span class="sc-key">netdata</span><span class="sc-port">:19999</span></div><div class="sc-desc">Real-time performance and health monitoring. Zero config.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Prometheus</span><span class="sc-key">prometheus</span><span class="sc-port">:9090</span></div><div class="sc-desc">Metrics collection. Auto-configures node exporter for host metrics.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Grafana</span><span class="sc-key">grafana</span><span class="sc-port">:3000</span></div><div class="sc-desc">Dashboard visualization. Admin credentials auto-saved.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Uptime Kuma</span><span class="sc-key">uptime_kuma</span><span class="sc-port">:3001</span></div><div class="sc-desc">Beautiful self-hosted uptime monitor and status page.</div><div class="sc-foot"><span class="sc-type td">docker</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Cockpit</span><span class="sc-key">cockpit</span><span class="sc-port">:9090</span></div><div class="sc-desc">Web-based system administration panel. Logs in with system users.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Loki</span><span class="sc-key">loki</span><span class="sc-port">:3100</span></div><div class="sc-desc">Log aggregation system. Pairs with Grafana for log dashboards.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- Dev -->
+      <div>
+        <div class="sg-label">Development Tools</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">Git</span><span class="sc-key">git</span></div><div class="sc-desc">Distributed version control. Required by most dev workflows.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Neovim</span><span class="sc-key">neovim</span></div><div class="sc-desc">Hyperextensible Vim-based text editor.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Zsh + Oh-My-Zsh</span><span class="sc-key">zsh</span></div><div class="sc-desc">Z shell with Oh-My-Zsh. Sets as your default shell.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Node.js + npm</span><span class="sc-key">node</span></div><div class="sc-desc">JavaScript runtime. LTS version from official repos.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Python 3 + pip</span><span class="sc-key">python</span></div><div class="sc-desc">Python interpreter and pip. Essential for scripts and tooling.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Go</span><span class="sc-key">golang</span></div><div class="sc-desc">Google's compiled language. Used by Docker, k3s, and more.</div><div class="sc-foot"><span class="sc-type tp">pacman</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Rust (rustup)</span><span class="sc-key">rust</span></div><div class="sc-desc">Systems language. Installs stable toolchain via rustup automatically.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Docker Buildx</span><span class="sc-key">docker_buildx</span></div><div class="sc-desc">Multi-platform Docker image builder. Extends standard docker build.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+      <!-- AI & Other -->
+      <div>
+        <div class="sg-label">AI &amp; Other</div>
+        <div class="svc-grid">
+          <div class="sc"><div class="sc-top"><span class="sc-name">Ollama</span><span class="sc-key">ollama</span><span class="sc-port">:11434</span></div><div class="sc-desc">Run LLMs locally (llama3, mistral, etc.). Needs 8+ GB RAM.</div><div class="sc-foot"><span class="sc-type tc2">curl</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Pi-hole</span><span class="sc-key">pihole</span></div><div class="sc-desc">Network-wide ad blocker. Needs port 53 free. Admin UI on port 80.</div><div class="sc-foot"><span class="sc-type tc2">curl</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Timeshift</span><span class="sc-key">timeshift</span></div><div class="sc-desc">System snapshot &amp; restore. Like Time Machine for Linux.</div><div class="sc-foot"><span class="sc-type ta">AUR</span></div></div>
+          <div class="sc"><div class="sc-top"><span class="sc-name">Restic</span><span class="sc-key">restic</span></div><div class="sc-desc">Fast encrypted backups. Installs appy-backup helper for easy use.</div><div class="sc-foot"><span class="sc-type tp">pacman</span><span class="sc-new">NEW</span></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+
+<!-- DAEMON -->
+<section id="daemon">
+  <div class="wrap">
+    <div class="ey">watchdog daemon</div>
+    <h2>Set it and forget it.</h2>
+    <p style="margin-top:8px;max-width:520px">Install the appy daemon once and it monitors your services continuously — restarting failures, logging health, and alerting on problems.</p>
+
+    <div class="daemon-layout">
+      <div class="daemon-features">
+        <div class="df"><div class="df-icon">🐾</div><div class="df-text"><h4>Service Watchdog</h4><p>Polls all appy-managed services every 5 minutes. Restarts any that have crashed and logs the event.</p></div></div>
+        <div class="df"><div class="df-icon">📈</div><div class="df-text"><h4>Resource Alerts</h4><p>Warns when disk exceeds 90% or memory exceeds 95%. All alerts logged to a notifications file.</p></div></div>
+        <div class="df"><div class="df-icon">📦</div><div class="df-text"><h4>Update Detection</h4><p>Checks for available package updates every 6 hours. Shows pending count in the main menu.</p></div></div>
+        <div class="df"><div class="df-icon">📜</div><div class="df-text"><h4>Log Rotation</h4><p>Automatically rotates appy logs when they exceed 10 MB. Keeps last 3 backups.</p></div></div>
+        <div class="df"><div class="df-icon">📧</div><div class="df-text"><h4>Email Notifications</h4><p>Set <code style="font-family:var(--co);font-size:11px;color:var(--g)">APPY_NOTIFY_EMAIL</code> to receive alerts via email when services fail.</p></div></div>
+      </div>
+
+      <div>
+        <div class="cb">
+          <div class="cm"># Install via maintenance menu</div>
+          <div>sudo bash appy.sh</div>
+          <div><span style="color:var(--a)">→</span> M <span style="color:var(--d)">→</span> 7</div>
+          <br>
+          <div class="cm"># Or install directly</div>
+          <div>sudo bash appy.sh <span style="color:var(--a)">--daemon</span> &amp;</div>
+          <br>
+          <div class="cm"># Check daemon status</div>
+          <div>systemctl status <span style="color:var(--g)">appy-daemon</span></div>
+          <br>
+          <div class="cm"># Watch live logs</div>
+          <div>tail -f <span style="color:var(--g)">/var/log/appy-daemon.log</span></div>
+          <br>
+          <div class="cm"># Configure check interval (seconds)</div>
+          <div><span style="color:var(--bl)">APPY_DAEMON_INTERVAL</span>=<span style="color:var(--a)">120</span></div>
+          <div class="cm"># Email alerts (requires mail)</div>
+          <div><span style="color:var(--bl)">APPY_NOTIFY_EMAIL</span>=<span style="color:var(--a)">"you@example.com"</span></div>
+        </div>
+
+        <div style="margin-top:20px">
+          <div class="ey" style="margin-bottom:12px">CLI flags</div>
+          <div class="flags-grid">
+            <div class="flag"><code>--health</code><p>Full color-coded health report</p></div>
+            <div class="flag"><code>--update</code><p>Update pacman + AUR + Docker</p></div>
+            <div class="flag"><code>--backup</code><p>Archive all service configs</p></div>
+            <div class="flag"><code>--status</code><p>One-line health snapshot</p></div>
+            <div class="flag"><code>--install nginx</code><p>Install service by key</p></div>
+            <div class="flag"><code>--remove nginx</code><p>Clean uninstall by key</p></div>
+            <div class="flag"><code>--logs</code><p>Show last 100 log lines</p></div>
+            <div class="flag"><code>--help</code><p>All flags and service keys</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+
+<!-- DEPLOY -->
+<section id="deploy">
+  <div class="wrap">
+    <div class="ey">deploy to cloudflare pages</div>
+    <h2>Host appy.sh free in 5 minutes.</h2>
+    <p style="margin-top:8px;max-width:500px">Cloudflare Pages — free, global CDN, automatic HTTPS. Your script stays always-available.</p>
+
+    <div class="ds">
+      <div class="dn">1</div>
+      <div><h3>Create a GitHub repo</h3><p>Go to <a href="https://github.com/new" target="_blank">github.com/new</a>. Name it <code>appy</code>. Set to Public. Click <strong style="color:var(--t)">Create repository</strong>.</p></div>
+    </div>
+    <div class="ds">
+      <div class="dn">2</div>
+      <div><h3>Push your files</h3><p>Add <code>appy.sh</code>, <code>index.html</code>, and <code>README.md</code> to the repo root and push.</p>
+      <div class="cl">git clone https://github.com/YOUR_USERNAME/appy.git &amp;&amp; cd appy<br>git add . &amp;&amp; git commit -m "appy v2.0" &amp;&amp; git push</div></div>
+    </div>
+    <div class="ds">
+      <div class="dn">3</div>
+      <div><h3>Connect to Cloudflare Pages</h3><p>Go to <a href="https://dash.cloudflare.com" target="_blank">dash.cloudflare.com</a> → <strong style="color:var(--t)">Workers &amp; Pages</strong> → <strong style="color:var(--t)">Create</strong> → <strong style="color:var(--t)">Pages</strong> → <strong style="color:var(--t)">Connect to Git</strong>. Select your <code>appy</code> repo.</p></div>
+    </div>
+    <div class="ds">
+      <div class="dn">4</div>
+      <div><h3>Build settings — leave everything blank</h3>
+      <div class="cfg">
+        <span class="k">Framework preset</span><span class="v">None</span>
+        <span class="k">Build command</span><span class="vd">(empty)</span>
+        <span class="k">Build output directory</span><span class="vd">(empty)</span>
+        <span class="k">Root directory</span><span class="vd">(empty)</span>
+      </div>
+      <p style="margin-top:10px">Click <strong style="color:var(--t)">Save and Deploy</strong>. Wait ~30 seconds.</p></div>
+    </div>
+    <div class="ds">
+      <div class="dn">5</div>
+      <div><h3>Update the download URL</h3><p>You'll get a URL like <code>appy-abc123.pages.dev</code>. Replace <code>YOUR-PROJECT.pages.dev</code> everywhere in the files, then push. Cloudflare auto-redeploys.</p>
+      <div class="cl" style="margin-top:8px">curl -fsSL https://appy-abc123.pages.dev/appy.sh -o appy.sh &amp;&amp; sudo bash appy.sh</div></div>
+    </div>
+    <div class="ds">
+      <div class="dn">6</div>
+      <div><h3>Custom domain (optional)</h3><p>Cloudflare Pages → your project → <strong style="color:var(--t)">Custom domains</strong> → <strong style="color:var(--t)">Set up a custom domain</strong>. If your domain is on Cloudflare, it connects in one click.</p></div>
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+
+<!-- MAINTENANCE -->
+<section id="maintenance">
+  <div class="wrap">
+    <div class="ey">maintenance</div>
+    <h2>Keep your system healthy.</h2>
+    <p style="margin-top:8px;max-width:520px">Press <strong style="color:var(--t)">M</strong> in the menu for the full maintenance panel, or use CLI flags directly.</p>
+    <div class="mg">
+      <div class="mc"><h3>Health Check</h3><p>CPU, memory, disk, load, per-service status, and Docker containers in one color-coded report.</p><div class="mc-cmd">sudo bash appy.sh --health</div></div>
+      <div class="mc"><h3>Full System Update</h3><p>Updates pacman packages, AUR packages, and all running Docker images in sequence.</p><div class="mc-cmd">sudo bash appy.sh --update</div></div>
+      <div class="mc"><h3>Config Backup</h3><p>Archives Nginx, Caddy, Prometheus, Grafana, UFW, WireGuard, and more. Keeps last 5.</p><div class="mc-cmd">sudo bash appy.sh --backup</div></div>
+      <div class="mc"><h3>Install Watchdog</h3><p>Installs appy as a systemd service that monitors and restarts failed services automatically.</p><div class="mc-cmd">M → 7 (in menu)</div></div>
+      <div class="mc"><h3>Auto-Update Timer</h3><p>Sets a daily or weekly systemd timer to keep the system updated hands-free.</p><div class="mc-cmd">M → 11 (in menu)</div></div>
+      <div class="mc"><h3>Service Rollback</h3><p>Cleanly stop, disable, and uninstall any appy-managed service including Docker containers.</p><div class="mc-cmd">M → 13 (in menu)</div></div>
+    </div>
+
+    <div style="margin-top:28px">
+      <div class="ey" style="margin-bottom:14px">important file paths</div>
+      <table class="ftable">
+        <thead><tr><th>Path</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td>/var/log/appy.log</td><td>General installation and operation log</td></tr>
+          <tr><td>/var/log/appy-daemon.log</td><td>Watchdog daemon activity and restarts</td></tr>
+          <tr><td>/var/lib/appy/notifications.log</td><td>Alert and notification history</td></tr>
+          <tr><td>/var/backups/appy-configs/</td><td>Config backup archives (last 5 kept)</td></tr>
+          <tr><td>~/appy-credentials.txt</td><td>Auto-generated passwords and tokens (mode 600)</td></tr>
+          <tr><td>/etc/systemd/system/appy-daemon.service</td><td>Watchdog systemd unit</td></tr>
+          <tr><td>/etc/systemd/system/appy-update.timer</td><td>Auto-update timer</td></tr>
+          <tr><td>/usr/local/bin/appy-backup</td><td>Restic backup helper script</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<hr style="max-width:1060px;margin:0 auto">
+<footer>
+  <p>appy.sh v2.0 · MIT License · CachyOS / Arch Linux</p>
+  <div style="display:flex;gap:20px"><a href="https://github.com/YOUR_USERNAME/appy">GitHub</a><a href="#top">↑ top</a></div>
+</footer>
+</div>
+
+<div id="toast"></div>
+<script>
+function showToast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function cp(text,btn){
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=Object.assign(document.createElement('textarea'),{value:text,style:'position:fixed;opacity:0'});
+    document.body.append(ta);ta.select();document.execCommand('copy');ta.remove()
+  });
+  showToast('✓ Copied to clipboard');
+  if(btn){const o=btn.textContent;btn.textContent='COPIED!';btn.classList.add('ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1800)}
+}
+
+// Highlight active nav link on scroll
+const sections=document.querySelectorAll('section[id],div[id="top"]');
+const navLinks=document.querySelectorAll('.nav-links a[href^="#"]');
+const obs=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      navLinks.forEach(l=>{
+        l.style.color=l.getAttribute('href')==='#'+e.target.id?'var(--t)':'';
+      });
+    }
+  });
+},{threshold:.3});
+sections.forEach(s=>obs.observe(s));
+</script>
+</body>
+</html>
