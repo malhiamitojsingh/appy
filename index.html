@@ -1,212 +1,881 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>bashonacci.sh — CachyOS service installer</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0C0C0E;--surface:#131318;--surface2:#18181F;
-  --border:#1E1E28;--border2:#2A2A38;
-  --green:#3DD68C;--green-d:#27A86B;
-  --amber:#E8A838;--blue:#5B9CF6;--red:#F06B6B;
-  --text:#F0F0F4;--muted:#8A8A9A;--dim:#4A4A5A;
-  --ui:Inter,system-ui,sans-serif;
-  --code:'JetBrains Mono',Consolas,monospace;
-  --r:5px;--nav-h:56px;
-}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--ui);font-size:15px;font-weight:400;line-height:1.6;min-height:100vh;-webkit-font-smoothing:antialiased}
-nav{position:fixed;top:0;left:0;right:0;height:var(--nav-h);background:rgba(12,12,14,0.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 40px;z-index:100}
-.nav-logo{display:flex;align-items:center;gap:9px;text-decoration:none;margin-right:auto}
-.logo-mark{width:28px;height:28px;background:var(--green);border-radius:6px;display:flex;align-items:center;justify-content:center;font-family:var(--code);font-size:12px;font-weight:500;color:#0C0C0E;flex-shrink:0}
-.logo-name{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.02em}
-.logo-name span{color:var(--muted);font-weight:400}
-.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
-.nav-links a{padding:6px 12px;border-radius:var(--r);color:var(--muted);text-decoration:none;font-size:14px;font-weight:500;display:flex;align-items:center;gap:7px;transition:color .15s,background .15s}
-.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.05)}
-.nav-links a.active{color:var(--text)}
-.kbd{font-size:10px;font-weight:400;padding:1px 5px;background:var(--surface);border:1px solid var(--border2);border-radius:3px;color:var(--dim);font-family:var(--ui)}
-.nav-gh{margin-left:12px;display:flex;align-items:center;gap:6px;padding:6px 14px;border:1px solid var(--border2);border-radius:var(--r);color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;transition:all .15s}
-.nav-gh:hover{border-color:var(--green);color:var(--green)}
-.page{padding-top:var(--nav-h);min-height:100vh}
-.wrap{max-width:1040px;margin:0 auto;padding:0 40px}
-h1{font-size:clamp(30px,4vw,50px);font-weight:700;letter-spacing:-0.03em;line-height:1.1;color:var(--text)}
-h2{font-size:clamp(20px,2.5vw,30px);font-weight:600;letter-spacing:-0.025em;line-height:1.2;color:var(--text)}
-h3{font-size:17px;font-weight:600;letter-spacing:-0.015em;line-height:1.3;color:var(--text)}
-p{color:var(--muted);font-weight:400;line-height:1.7}
-.eyebrow{font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--green);display:flex;align-items:center;gap:8px;margin-bottom:14px}
-.eyebrow::before{content:'//';color:var(--dim);font-weight:300;letter-spacing:0}
-.term{background:#08080F;border:1px solid var(--border);border-radius:8px;overflow:hidden;font-family:var(--code)}
-.term-bar{display:flex;align-items:center;gap:6px;padding:10px 14px;background:var(--surface);border-bottom:1px solid var(--border)}
-.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
-.dr{background:#FF5F57}.dy{background:#FEBC2E}.dg{background:#28C840}
-.term-title{margin-left:8px;font-size:11px;font-weight:400;color:var(--dim);font-family:var(--ui);flex:1;text-align:center}
-.term-body{padding:20px 22px;font-size:13px}
-.ps1{color:var(--green);user-select:none;margin-right:8px;font-weight:400}
-.tc{color:var(--text);font-weight:500}
-.to{color:var(--muted);font-weight:400}
-.tok{color:var(--green);font-weight:400}
-.tw{color:var(--amber);font-weight:400}
-.tb{color:var(--blue);font-weight:400}
-.td{color:var(--dim);font-weight:300}
-.kw{color:var(--amber);font-weight:500}
-.kwb{color:var(--blue);font-weight:400}
-.copy-btn{background:none;border:1px solid var(--border2);color:var(--muted);font-family:var(--ui);font-size:12px;font-weight:500;letter-spacing:0.04em;padding:5px 12px;border-radius:var(--r);cursor:pointer;transition:all .15s}
-.copy-btn:hover{border-color:var(--green);color:var(--green)}
-.copy-btn.ok{border-color:var(--green);color:var(--green);background:rgba(61,214,140,0.07)}
-.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:var(--r);font-family:var(--ui);font-size:14px;font-weight:500;cursor:pointer;text-decoration:none;transition:all .15s;border:none}
-.btn-primary{background:var(--green);color:#0C0C0E}
-.btn-primary:hover{background:var(--green-d)}
-.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted)}
-.btn-ghost:hover{border-color:var(--text);color:var(--text)}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:22px;transition:border-color .2s;position:relative;overflow:hidden}
-.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--green);opacity:0;transition:opacity .2s}
-.card:hover{border-color:var(--border2)}.card:hover::before{opacity:1}
-.badge{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border:1px solid var(--border2);border-radius:20px;font-size:12px;font-weight:400;color:var(--muted);background:var(--surface)}
-.bdot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:pulse 2s ease infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.chip{display:inline-block;font-size:11px;font-weight:500;letter-spacing:0.04em;padding:2px 7px;border-radius:3px}
-.chip-ok{background:rgba(61,214,140,.1);color:var(--green);border:1px solid rgba(61,214,140,.2)}
-.chip-w{background:rgba(232,168,56,.1);color:var(--amber);border:1px solid rgba(232,168,56,.2)}
-.chip-bad{background:rgba(240,107,107,.1);color:var(--red);border:1px solid rgba(240,107,107,.2)}
-.chip-b{background:rgba(91,156,246,.1);color:var(--blue);border:1px solid rgba(91,156,246,.2)}
-hr{border:none;border-top:1px solid var(--border);margin:64px 0}
-footer{border-top:1px solid var(--border);padding:28px 40px;display:flex;justify-content:space-between;align-items:center;max-width:1040px;margin:0 auto}
-footer p{font-size:13px;font-weight:400;color:var(--dim);margin:0}
-footer a{color:var(--dim);text-decoration:none;font-weight:500;transition:color .15s}
-footer a:hover{color:var(--green)}
-#toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--green-d);color:var(--green);padding:10px 18px;font-size:13px;font-weight:500;border-radius:var(--r);opacity:0;transform:translateY(4px);transition:all .18s;pointer-events:none;z-index:9999;font-family:var(--ui)}
-#toast.show{opacity:1;transform:translateY(0)}
-@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
-.u{animation:up .4s ease both}
-.u1{animation-delay:.07s}.u2{animation-delay:.14s}.u3{animation-delay:.21s}
-@media(max-width:700px){nav{padding:0 20px}.wrap{padding:0 20px}.hide-m{display:none}footer{flex-direction:column;gap:8px;text-align:center;padding:24px 20px}}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>bashonacci.sh — CachyOS service installer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --bg: #0c0c0e;
+        --surface: #131318;
+        --surface2: #18181f;
+        --border: #1e1e28;
+        --border2: #2a2a38;
+        --green: #3dd68c;
+        --green-d: #27a86b;
+        --amber: #e8a838;
+        --blue: #5b9cf6;
+        --red: #f06b6b;
+        --text: #f0f0f4;
+        --muted: #8a8a9a;
+        --dim: #4a4a5a;
+        --ui: Inter, system-ui, sans-serif;
+        --code: "JetBrains Mono", Consolas, monospace;
+        --r: 5px;
+        --nav-h: 56px;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--ui);
+        font-size: 15px;
+        font-weight: 400;
+        line-height: 1.6;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+      }
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: var(--nav-h);
+        background: rgba(12, 12, 14, 0.92);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        padding: 0 40px;
+        z-index: 100;
+      }
+      .nav-logo {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        text-decoration: none;
+        margin-right: auto;
+      }
+      .logo-mark {
+        width: 28px;
+        height: 28px;
+        background: var(--green);
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--code);
+        font-size: 12px;
+        font-weight: 500;
+        color: #0c0c0e;
+        flex-shrink: 0;
+      }
+      .logo-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--text);
+        letter-spacing: -0.02em;
+      }
+      .logo-name span {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        list-style: none;
+      }
+      .nav-links a {
+        padding: 6px 12px;
+        border-radius: var(--r);
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .nav-links a:hover {
+        color: var(--text);
+        background: rgba(255, 255, 255, 0.05);
+      }
+      .nav-links a.active {
+        color: var(--text);
+      }
+      .kbd {
+        font-size: 10px;
+        font-weight: 400;
+        padding: 1px 5px;
+        background: var(--surface);
+        border: 1px solid var(--border2);
+        border-radius: 3px;
+        color: var(--dim);
+        font-family: var(--ui);
+      }
+      .nav-gh {
+        margin-left: 12px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border: 1px solid var(--border2);
+        border-radius: var(--r);
+        color: var(--muted);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.15s;
+      }
+      .nav-gh:hover {
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .page {
+        padding-top: var(--nav-h);
+        min-height: 100vh;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 0 40px;
+      }
+      h1 {
+        font-size: clamp(30px, 4vw, 50px);
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        color: var(--text);
+      }
+      h2 {
+        font-size: clamp(20px, 2.5vw, 30px);
+        font-weight: 600;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+        color: var(--text);
+      }
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        line-height: 1.3;
+        color: var(--text);
+      }
+      p {
+        color: var(--muted);
+        font-weight: 400;
+        line-height: 1.7;
+      }
+      .eyebrow {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--green);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .eyebrow::before {
+        content: "//";
+        color: var(--dim);
+        font-weight: 300;
+        letter-spacing: 0;
+      }
+      .term {
+        background: #08080f;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+        font-family: var(--code);
+      }
+      .term-bar {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 14px;
+        background: var(--surface);
+        border-bottom: 1px solid var(--border);
+      }
+      .dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .dr {
+        background: #ff5f57;
+      }
+      .dy {
+        background: #febc2e;
+      }
+      .dg {
+        background: #28c840;
+      }
+      .term-title {
+        margin-left: 8px;
+        font-size: 11px;
+        font-weight: 400;
+        color: var(--dim);
+        font-family: var(--ui);
+        flex: 1;
+        text-align: center;
+      }
+      .term-body {
+        padding: 20px 22px;
+        font-size: 13px;
+      }
+      .ps1 {
+        color: var(--green);
+        user-select: none;
+        margin-right: 8px;
+        font-weight: 400;
+      }
+      .tc {
+        color: var(--text);
+        font-weight: 500;
+      }
+      .to {
+        color: var(--muted);
+        font-weight: 400;
+      }
+      .tok {
+        color: var(--green);
+        font-weight: 400;
+      }
+      .tw {
+        color: var(--amber);
+        font-weight: 400;
+      }
+      .tb {
+        color: var(--blue);
+        font-weight: 400;
+      }
+      .td {
+        color: var(--dim);
+        font-weight: 300;
+      }
+      .kw {
+        color: var(--amber);
+        font-weight: 500;
+      }
+      .kwb {
+        color: var(--blue);
+        font-weight: 400;
+      }
+      .copy-btn {
+        background: none;
+        border: 1px solid var(--border2);
+        color: var(--muted);
+        font-family: var(--ui);
+        font-size: 12px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 5px 12px;
+        border-radius: var(--r);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .copy-btn:hover {
+        border-color: var(--green);
+        color: var(--green);
+      }
+      .copy-btn.ok {
+        border-color: var(--green);
+        color: var(--green);
+        background: rgba(61, 214, 140, 0.07);
+      }
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        border-radius: var(--r);
+        font-family: var(--ui);
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        text-decoration: none;
+        transition: all 0.15s;
+        border: none;
+      }
+      .btn-primary {
+        background: var(--green);
+        color: #0c0c0e;
+      }
+      .btn-primary:hover {
+        background: var(--green-d);
+      }
+      .btn-ghost {
+        background: none;
+        border: 1px solid var(--border2);
+        color: var(--muted);
+      }
+      .btn-ghost:hover {
+        border-color: var(--text);
+        color: var(--text);
+      }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 22px;
+        transition: border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--green);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .card:hover {
+        border-color: var(--border2);
+      }
+      .card:hover::before {
+        opacity: 1;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 11px;
+        border: 1px solid var(--border2);
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--muted);
+        background: var(--surface);
+      }
+      .bdot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--green);
+        animation: pulse 2s ease infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+      .chip {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.04em;
+        padding: 2px 7px;
+        border-radius: 3px;
+      }
+      .chip-ok {
+        background: rgba(61, 214, 140, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(61, 214, 140, 0.2);
+      }
+      .chip-w {
+        background: rgba(232, 168, 56, 0.1);
+        color: var(--amber);
+        border: 1px solid rgba(232, 168, 56, 0.2);
+      }
+      .chip-bad {
+        background: rgba(240, 107, 107, 0.1);
+        color: var(--red);
+        border: 1px solid rgba(240, 107, 107, 0.2);
+      }
+      .chip-b {
+        background: rgba(91, 156, 246, 0.1);
+        color: var(--blue);
+        border: 1px solid rgba(91, 156, 246, 0.2);
+      }
+      hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 64px 0;
+      }
+      footer {
+        border-top: 1px solid var(--border);
+        padding: 28px 40px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      footer p {
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--dim);
+        margin: 0;
+      }
+      footer a {
+        color: var(--dim);
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.15s;
+      }
+      footer a:hover {
+        color: var(--green);
+      }
+      #toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--surface);
+        border: 1px solid var(--green-d);
+        color: var(--green);
+        padding: 10px 18px;
+        font-size: 13px;
+        font-weight: 500;
+        border-radius: var(--r);
+        opacity: 0;
+        transform: translateY(4px);
+        transition: all 0.18s;
+        pointer-events: none;
+        z-index: 9999;
+        font-family: var(--ui);
+      }
+      #toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      @keyframes up {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .u {
+        animation: up 0.4s ease both;
+      }
+      .u1 {
+        animation-delay: 0.07s;
+      }
+      .u2 {
+        animation-delay: 0.14s;
+      }
+      .u3 {
+        animation-delay: 0.21s;
+      }
+      @media (max-width: 700px) {
+        nav {
+          padding: 0 20px;
+        }
+        .wrap {
+          padding: 0 20px;
+        }
+        .hide-m {
+          display: none;
+        }
+        footer {
+          flex-direction: column;
+          gap: 8px;
+          text-align: center;
+          padding: 24px 20px;
+        }
+      }
 
-.hero{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center;padding:88px 40px 72px;max-width:1040px;margin:0 auto}
-.hero-left{display:flex;flex-direction:column;gap:18px}
-.hero h1 .hl{color:var(--green)}
-.hero-sub{font-size:15px;color:var(--muted);line-height:1.75;max-width:420px}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
-.stats{display:flex;gap:0;padding-top:20px;border-top:1px solid var(--border);margin-top:8px}
-.stat{flex:1}
-.stat strong{display:block;font-size:24px;font-weight:600;color:var(--text);letter-spacing:-0.03em;line-height:1}
-.stat span{font-size:12px;font-weight:400;color:var(--dim);margin-top:3px;display:block}
-.cmd-row{display:flex;align-items:center;gap:10px;background:rgba(61,214,140,.04);border:1px solid rgba(61,214,140,.15);border-radius:var(--r);padding:12px 14px;margin-top:14px;cursor:pointer;transition:background .15s,border-color .15s}
-.cmd-row:hover{background:rgba(61,214,140,.08);border-color:rgba(61,214,140,.3)}
-.cmd-row .ps{font-family:var(--code);font-weight:400;color:var(--green);flex-shrink:0;user-select:none}
-.cmd-row code{font-family:var(--code);font-size:13px;font-weight:500;color:var(--text);flex:1;word-break:break-all}
-.strip{border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 40px;display:flex;align-items:center;justify-content:center;gap:36px;flex-wrap:wrap}
-.strip-item{font-size:13px;font-weight:400;color:var(--muted);display:flex;align-items:center;gap:6px}
-.strip-item .ok{color:var(--green)}
-.modes-wrap{max-width:1040px;margin:0 auto;padding:72px 40px}
-.modes-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
-.mode-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;transition:border-color .2s}
-.mode-card:hover{border-color:var(--amber)}
-.mode-label{font-size:11px;font-weight:500;letter-spacing:0.1em;text-transform:uppercase;color:var(--amber);margin-bottom:8px}
-.mode-title{font-size:16px;font-weight:600;color:var(--text);margin-bottom:6px}
-.mode-desc{font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:14px}
-.mode-cmd{font-family:var(--code);font-size:12px;font-weight:400;color:var(--dim);background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:8px 10px;word-break:break-all}
-.mode-cmd .flag{color:var(--blue)}
-@media(max-width:840px){.hero{grid-template-columns:1fr;gap:40px;padding:64px 20px 48px}.modes-grid{grid-template-columns:1fr}.strip,.modes-wrap{padding-left:20px;padding-right:20px}}
-</style>
-</head>
-<body>
-<div id="nav-mount"></div>
-<div class="page">
-  <section class="hero">
-    <div class="hero-left u">
-      <div class="badge"><span class="bdot"></span> CachyOS / Arch Linux</div>
-      <h1>Server setup,<br>but <span class="hl">actually</span> simple.</h1>
-      <p class="hero-sub">Pick the services you want. The script installs them, enables them, and gets out of your way.</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary" data-copy="sudo ./setup.sh --interactive">↓ Copy install command</button>
-        <a class="btn btn-ghost" href="how-it-works.html">How it works →</a>
-      </div>
-      <div class="stats">
-        <div class="stat"><strong>16</strong><span>services</span></div>
-        <div class="stat"><strong>3</strong><span>run modes</span></div>
-        <div class="stat"><strong>pacman</strong><span>+ yay (AUR)</span></div>
-        <div class="stat"><strong>auto</strong><span>service enable</span></div>
-      </div>
-    </div>
-    <div class="u u2">
-      <div class="term">
-        <div class="term-bar">
-          <span class="dot dr"></span><span class="dot dy"></span><span class="dot dg"></span>
-          <span class="term-title">root@cachyos — bash</span>
-        </div>
-        <div class="term-body">
-          <div style="margin-bottom:14px">
-            <span class="ps1">$</span><span class="tc">sudo ./setup.sh <span class="kwb">--interactive</span></span>
+      .hero {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+        padding: 88px 40px 72px;
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      .hero-left {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .hero h1 .hl {
+        color: var(--green);
+      }
+      .hero-sub {
+        font-size: 15px;
+        color: var(--muted);
+        line-height: 1.75;
+        max-width: 420px;
+      }
+      .hero-actions {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-top: 4px;
+      }
+      .stats {
+        display: flex;
+        gap: 0;
+        padding-top: 20px;
+        border-top: 1px solid var(--border);
+        margin-top: 8px;
+      }
+      .stat {
+        flex: 1;
+      }
+      .stat strong {
+        display: block;
+        font-size: 24px;
+        font-weight: 600;
+        color: var(--text);
+        letter-spacing: -0.03em;
+        line-height: 1;
+      }
+      .stat span {
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--dim);
+        margin-top: 3px;
+        display: block;
+      }
+      .cmd-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(61, 214, 140, 0.04);
+        border: 1px solid rgba(61, 214, 140, 0.15);
+        border-radius: var(--r);
+        padding: 12px 14px;
+        margin-top: 14px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          border-color 0.15s;
+      }
+      .cmd-row:hover {
+        background: rgba(61, 214, 140, 0.08);
+        border-color: rgba(61, 214, 140, 0.3);
+      }
+      .cmd-row .ps {
+        font-family: var(--code);
+        font-weight: 400;
+        color: var(--green);
+        flex-shrink: 0;
+        user-select: none;
+      }
+      .cmd-row code {
+        font-family: var(--code);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        flex: 1;
+        word-break: break-all;
+      }
+      .strip {
+        border-top: 1px solid var(--border);
+        border-bottom: 1px solid var(--border);
+        padding: 16px 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 36px;
+        flex-wrap: wrap;
+      }
+      .strip-item {
+        font-size: 13px;
+        font-weight: 400;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .strip-item .ok {
+        color: var(--green);
+      }
+      .modes-wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+        padding: 72px 40px;
+      }
+      .modes-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-top: 28px;
+      }
+      .mode-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--r);
+        padding: 20px;
+        transition: border-color 0.2s;
+      }
+      .mode-card:hover {
+        border-color: var(--amber);
+      }
+      .mode-label {
+        font-size: 11px;
+        font-weight: 500;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--amber);
+        margin-bottom: 8px;
+      }
+      .mode-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--text);
+        margin-bottom: 6px;
+      }
+      .mode-desc {
+        font-size: 13px;
+        color: var(--muted);
+        line-height: 1.65;
+        margin-bottom: 14px;
+      }
+      .mode-cmd {
+        font-family: var(--code);
+        font-size: 12px;
+        font-weight: 400;
+        color: var(--dim);
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 3px;
+        padding: 8px 10px;
+        word-break: break-all;
+      }
+      .mode-cmd .flag {
+        color: var(--blue);
+      }
+      @media (max-width: 840px) {
+        .hero {
+          grid-template-columns: 1fr;
+          gap: 40px;
+          padding: 64px 20px 48px;
+        }
+        .modes-grid {
+          grid-template-columns: 1fr;
+        }
+        .strip,
+        .modes-wrap {
+          padding-left: 20px;
+          padding-right: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="nav-mount"></div>
+    <div class="page">
+      <section class="hero">
+        <div class="hero-left u">
+          <div class="badge">
+            <span class="bdot"></span> CachyOS / Arch Linux
           </div>
-          <div class="to" style="margin-bottom:8px">Available Services:</div>
-          <div class="to" style="margin-bottom:3px">&nbsp; 1) docker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Docker container runtime</div>
-          <div class="to" style="margin-bottom:3px">&nbsp; 2) nginx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Nginx web server</div>
-          <div class="to" style="margin-bottom:3px">&nbsp; 3) mysql&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - MySQL/MariaDB database</div>
-          <div class="to" style="margin-bottom:3px">&nbsp; 4) jellyfin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Jellyfin media server</div>
-          <div class="to" style="margin-bottom:3px">&nbsp; ...</div>
-          <div class="tw" style="margin-top:8px;margin-bottom:4px">Enter numbers (or 'all'):</div>
-          <div class="to"><span class="ps1">→</span> <span class="tc">1 3 4</span></div>
+          <h1>
+            Server setup,<br />but <span class="hl">actually</span> simple.
+          </h1>
+          <p class="hero-sub">
+            Pick the services you want. The script installs them, enables them,
+            and gets out of your way.
+          </p>
+          <div class="hero-actions">
+            <button
+              class="btn btn-primary"
+              data-copy="sudo ./setup.sh --interactive"
+            >
+              ↓ Copy install command
+            </button>
+            <a class="btn btn-ghost" href="how-it-works.html">How it works →</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>16</strong><span>services</span></div>
+            <div class="stat"><strong>3</strong><span>run modes</span></div>
+            <div class="stat">
+              <strong>pacman</strong><span>+ yay (AUR)</span>
+            </div>
+            <div class="stat">
+              <strong>auto</strong><span>service enable</span>
+            </div>
+          </div>
+        </div>
+        <div class="u u2">
+          <div class="term">
+            <div class="term-bar">
+              <span class="dot dr"></span><span class="dot dy"></span
+              ><span class="dot dg"></span>
+              <span class="term-title">root@cachyos — bash</span>
+            </div>
+            <div class="term-body">
+              <div style="margin-bottom: 14px">
+                <span class="ps1">$</span
+                ><span class="tc"
+                  >sudo ./setup.sh <span class="kwb">--interactive</span></span
+                >
+              </div>
+              <div class="to" style="margin-bottom: 8px">
+                Available Services:
+              </div>
+              <div class="to" style="margin-bottom: 3px">
+                &nbsp; 1) docker&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -
+                Docker container runtime
+              </div>
+              <div class="to" style="margin-bottom: 3px">
+                &nbsp; 2) nginx&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                - Nginx web server
+              </div>
+              <div class="to" style="margin-bottom: 3px">
+                &nbsp; 3) mysql&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                - MySQL/MariaDB database
+              </div>
+              <div class="to" style="margin-bottom: 3px">
+                &nbsp; 4) jellyfin&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - Jellyfin
+                media server
+              </div>
+              <div class="to" style="margin-bottom: 3px">&nbsp; ...</div>
+              <div class="tw" style="margin-top: 8px; margin-bottom: 4px">
+                Enter numbers (or 'all'):
+              </div>
+              <div class="to">
+                <span class="ps1">→</span> <span class="tc">1 3 4</span>
+              </div>
+            </div>
+          </div>
+          <div
+            class="cmd-row"
+            onclick="
+              copyText(
+                'sudo ./setup.sh --interactive',
+                this.querySelector('.copy-btn'),
+              )
+            "
+          >
+            <span class="ps">$</span>
+            <code>sudo ./setup.sh <span class="kwb">--interactive</span></code>
+            <button class="copy-btn">COPY</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="strip u u3">
+        <div class="strip-item">
+          <span class="ok">✓</span> CachyOS / Arch Linux
+        </div>
+        <div class="strip-item">
+          <span class="ok">✓</span> pacman + AUR (yay)
+        </div>
+        <div class="strip-item">
+          <span class="ok">✓</span> Auto service enable
+        </div>
+        <div class="strip-item">
+          <span class="ok">✓</span> Root check built-in
+        </div>
+        <div class="strip-item">
+          <span class="ok">✓</span> yay auto-installed if missing
         </div>
       </div>
-      <div class="cmd-row" onclick="copyText('sudo ./setup.sh --interactive',this.querySelector('.copy-btn'))">
-        <span class="ps">$</span>
-        <code>sudo ./setup.sh <span class="kwb">--interactive</span></code>
-        <button class="copy-btn">COPY</button>
-      </div>
+
+      <section class="modes-wrap">
+        <div class="eyebrow">three ways to run it</div>
+        <h2>Pick services your way.</h2>
+        <p style="margin-top: 8px; max-width: 480px">
+          Interactive menu, direct service names, or just list what's available.
+        </p>
+        <div class="modes-grid">
+          <div class="mode-card">
+            <div class="mode-label">// interactive</div>
+            <div class="mode-title">Pick from a menu</div>
+            <div class="mode-desc">
+              Shows a numbered list of all services. Enter the numbers you want,
+              or type 'all'.
+            </div>
+            <div class="mode-cmd">
+              sudo ./setup.sh <span class="flag">--interactive</span>
+            </div>
+            <button
+              class="copy-btn"
+              style="margin-top: 12px"
+              data-copy="sudo ./setup.sh --interactive"
+            >
+              COPY
+            </button>
+          </div>
+          <div class="mode-card">
+            <div class="mode-label">// direct</div>
+            <div class="mode-title">Name them directly</div>
+            <div class="mode-desc">
+              Know what you want? Pass the service names as arguments and it
+              installs them immediately.
+            </div>
+            <div class="mode-cmd">
+              sudo ./setup.sh <span class="flag">docker nginx postgres</span>
+            </div>
+            <button
+              class="copy-btn"
+              style="margin-top: 12px"
+              data-copy="sudo ./setup.sh docker nginx postgres"
+            >
+              COPY
+            </button>
+          </div>
+          <div class="mode-card">
+            <div class="mode-label">// list</div>
+            <div class="mode-title">See what's available</div>
+            <div class="mode-desc">
+              Prints all available service names and their descriptions. No
+              installation happens.
+            </div>
+            <div class="mode-cmd">
+              sudo ./setup.sh <span class="flag">--list</span>
+            </div>
+            <button
+              class="copy-btn"
+              style="margin-top: 12px"
+              data-copy="sudo ./setup.sh --list"
+            >
+              COPY
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <hr style="max-width: 1040px; margin: 0 auto" />
+      <footer>
+        <p>bashonacci.sh · MIT License · CachyOS / Arch</p>
+        <div style="display: flex; gap: 20px">
+          <a href="https://github.com/malhiamitojsingh/appy.git">GitHub</a
+          ><a href="#top">↑ top</a>
+        </div>
+      </footer>
     </div>
-  </section>
-
-  <div class="strip u u3">
-    <div class="strip-item"><span class="ok">✓</span> CachyOS / Arch Linux</div>
-    <div class="strip-item"><span class="ok">✓</span> pacman + AUR (yay)</div>
-    <div class="strip-item"><span class="ok">✓</span> Auto service enable</div>
-    <div class="strip-item"><span class="ok">✓</span> Root check built-in</div>
-    <div class="strip-item"><span class="ok">✓</span> yay auto-installed if missing</div>
-  </div>
-
-  <section class="modes-wrap">
-    <div class="eyebrow">three ways to run it</div>
-    <h2>Pick services your way.</h2>
-    <p style="margin-top:8px;max-width:480px">Interactive menu, direct service names, or just list what's available.</p>
-    <div class="modes-grid">
-      <div class="mode-card">
-        <div class="mode-label">// interactive</div>
-        <div class="mode-title">Pick from a menu</div>
-        <div class="mode-desc">Shows a numbered list of all services. Enter the numbers you want, or type 'all'.</div>
-        <div class="mode-cmd">sudo ./setup.sh <span class="flag">--interactive</span></div>
-        <button class="copy-btn" style="margin-top:12px" data-copy="sudo ./setup.sh --interactive">COPY</button>
-      </div>
-      <div class="mode-card">
-        <div class="mode-label">// direct</div>
-        <div class="mode-title">Name them directly</div>
-        <div class="mode-desc">Know what you want? Pass the service names as arguments and it installs them immediately.</div>
-        <div class="mode-cmd">sudo ./setup.sh <span class="flag">docker nginx postgres</span></div>
-        <button class="copy-btn" style="margin-top:12px" data-copy="sudo ./setup.sh docker nginx postgres">COPY</button>
-      </div>
-      <div class="mode-card">
-        <div class="mode-label">// list</div>
-        <div class="mode-title">See what's available</div>
-        <div class="mode-desc">Prints all available service names and their descriptions. No installation happens.</div>
-        <div class="mode-cmd">sudo ./setup.sh <span class="flag">--list</span></div>
-        <button class="copy-btn" style="margin-top:12px" data-copy="sudo ./setup.sh --list">COPY</button>
-      </div>
-    </div>
-  </section>
-
-  <hr style="max-width:1040px;margin:0 auto">
-  <footer>
-    <p>bashonacci.sh · MIT License · CachyOS / Arch</p>
-    <div style="display:flex;gap:20px"><a href="https://github.com/malhiamitojsingh/appy.git">GitHub</a><a href="#top">↑ top</a></div>
-  </footer>
-</div>
-<div id="toast"></div>
-<script>
-(function(){
-  const h=`<nav>
+    <div id="toast"></div>
+    <script>
+      (function () {
+        const h = `<nav>
   <a class="nav-logo" href="index.html">
     <span class="logo-mark">$_</span>
     <span class="logo-name">bashonacci<span>.sh</span></span>
@@ -215,38 +884,54 @@ footer a:hover{color:var(--green)}
     <li class="hide-m"><a href="features.html">Features</a></li>
     <li class="hide-m"><a href="components.html">Components</a></li>
     <li class="hide-m"><a href="how-it-works.html">How It Works</a></li>
-    <li><a href="https://github.com/YOUR_USERNAME/bashonacci" target="_blank" class="nav-gh">
+    <li><a href="https://github.com/malhiamtiojsingh/appy.git" target="_blank" class="nav-gh">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .31.21.69.82.57C20.56 21.8 24 17.3 24 12 24 5.37 18.63 0 12 0z"/></svg>
       GitHub</a></li>
   </ul></nav>`;
-  const m=document.getElementById('nav-mount');
-  if(m)m.outerHTML=h;
-})();
-</script>
-<script>
-function showToast(m){
-  const t=document.getElementById('toast');if(!t)return;
-  t.textContent=m;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
-}
-function copyText(text,btn){
-  navigator.clipboard.writeText(text).catch(()=>{
-    const ta=Object.assign(document.createElement('textarea'),{value:text,style:'position:fixed;opacity:0'});
-    document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();
-  });
-  showToast('✓ Copied to clipboard');
-  if(btn){const o=btn.textContent;btn.textContent='COPIED!';btn.classList.add('ok');setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1800)}
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  const path=location.pathname;
-  document.querySelectorAll('.nav-links a').forEach(a=>{
-    const href=a.getAttribute('href');
-    if(href&&path.endsWith(href))a.classList.add('active');
-  });
-  document.querySelectorAll('[data-copy]').forEach(btn=>{
-    btn.addEventListener('click',()=>copyText(btn.dataset.copy,btn));
-  });
-});
-</script>
-</body>
+        const m = document.getElementById("nav-mount");
+        if (m) m.outerHTML = h;
+      })();
+    </script>
+    <script>
+      function showToast(m) {
+        const t = document.getElementById("toast");
+        if (!t) return;
+        t.textContent = m;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 2000);
+      }
+      function copyText(text, btn) {
+        navigator.clipboard.writeText(text).catch(() => {
+          const ta = Object.assign(document.createElement("textarea"), {
+            value: text,
+            style: "position:fixed;opacity:0",
+          });
+          document.body.append(ta);
+          ta.select();
+          document.execCommand("copy");
+          ta.remove();
+        });
+        showToast("✓ Copied to clipboard");
+        if (btn) {
+          const o = btn.textContent;
+          btn.textContent = "COPIED!";
+          btn.classList.add("ok");
+          setTimeout(() => {
+            btn.textContent = o;
+            btn.classList.remove("ok");
+          }, 1800);
+        }
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        const path = location.pathname;
+        document.querySelectorAll(".nav-links a").forEach((a) => {
+          const href = a.getAttribute("href");
+          if (href && path.endsWith(href)) a.classList.add("active");
+        });
+        document.querySelectorAll("[data-copy]").forEach((btn) => {
+          btn.addEventListener("click", () => copyText(btn.dataset.copy, btn));
+        });
+      });
+    </script>
+  </body>
 </html>
