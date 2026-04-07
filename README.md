@@ -21,7 +21,7 @@ sudo bash appy.sh
 Or clone and run directly:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/appy.git
+git clone https://github.com/malhiamitojsingh/appy.git
 cd appy
 sudo bash appy.sh
 ```
