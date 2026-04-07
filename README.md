@@ -1,6 +1,6 @@
 # appy.sh v2.0
 
-> Interactive service installer, watchdog daemon, and system manager for CachyOS / Arch Linux. You can also use web to checkout our project: [appy.sh](appy.malhiamitojsingh.workers.dev)
+> Interactive service installer, watchdog daemon, and system manager for CachyOS / Arch Linux. You can also use web to checkout our project: [appy.sh](https://appy.malhiamitojsingh.workers.dev)
 
 ```bash
 sudo bash appy.sh
