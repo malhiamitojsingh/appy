@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Features — bashonacci.sh</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/*
+  FONT WEIGHT SYSTEM — Inter only for all prose and UI.
+  JetBrains Mono only for actual code, commands, terminal output.
+
+  300  light   → timestamps, captions, secondary metadata. Signals "not critical".
+  400  regular → body text, descriptions. The reading default.
+  500  medium  → nav links, labels, card titles, button text. UI elements that
+                 need to be noticed but not shouted.
+  600  semibold→ section headings h2/h3, stat numbers. Strong emphasis without
+                 aggression. Most "important" content lives here.
+  700  bold    → page h1 only, logo text. Maximum weight used once per page
+                 so it retains visual impact.
+
+  Mono 400     → command output, log lines, values that are data not prose.
+  Mono 500     → the actual command the user will copy. Slightly heavier than
+                 output so the action stands out from the result.
+
+  COLOR:
+  #0C0C0E  bg         — near-black, warm tint. Not #000 (harsh) not #111 (generic)
+  #131318  surface    — card bg, 1 step above bg
+  #18181F  surface2   — inputs, code bg
+  #1E1E28  border     — visible but not distracting
+  #2A2A38  border2    — hover state borders, stronger dividers
+  #3DD68C  green      — success, selected, active. Terminal green but not eye-burn
+  #27A86B  green-d    — darker green for hover states
+  #E8A838  amber      — warnings, interactive accent. Warm, not neon
+  #5B9CF6  blue       — informational, secondary actions
+  #F06B6B  red        — errors, blocked states
+  #F0F0F4  text       — near-white with warmth. Pure #FFF reads harsh on dark
+  #8A8A9A  muted      — secondary text. Readable but clearly secondary
+  #4A4A5A  dim        — tertiary, disabled, timestamps
+*/
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0C0C0E;--surface:#131318;--surface2:#18181F;
+  --border:#1E1E28;--border2:#2A2A38;
+  --green:#3DD68C;--green-d:#27A86B;
+  --amber:#E8A838;--blue:#5B9CF6;--red:#F06B6B;
+  --text:#F0F0F4;--muted:#8A8A9A;--dim:#4A4A5A;
+  --ui:Inter,system-ui,sans-serif;
+  --code:'JetBrains Mono',Consolas,monospace;
+  --r:5px;--nav-h:56px;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:var(--ui);font-size:15px;
+  font-weight:400;line-height:1.6;
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;height:var(--nav-h);
+  background:rgba(12,12,14,0.9);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 40px;z-index:100;
+}
+.nav-logo{
+  display:flex;align-items:center;gap:9px;
+  text-decoration:none;margin-right:auto;
+}
+.logo-mark{
+  width:28px;height:28px;background:var(--green);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--code);font-size:12px;font-weight:500;color:#0C0C0E;
+  flex-shrink:0;
+}
+.logo-name{
+  font-size:14px;font-weight:700;color:var(--text);letter-spacing:-0.02em;
+}
+.logo-name span{color:var(--muted);font-weight:400}
+.nav-links{display:flex;align-items:center;gap:4px;list-style:none}
+.nav-links a{
+  padding:6px 12px;border-radius:var(--r);
+  color:var(--muted);text-decoration:none;
+  font-size:14px;font-weight:500;
+  display:flex;align-items:center;gap:7px;
+  transition:color .15s,background .15s;
+}
+.nav-links a:hover{color:var(--text);background:rgba(255,255,255,0.05)}
+.nav-links a.active{color:var(--text)}
+.kbd{
+  font-size:10px;font-weight:400;padding:1px 5px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:3px;color:var(--dim);font-family:var(--ui);
+}
+.nav-gh{
+  margin-left:12px;display:flex;align-items:center;gap:6px;
+  padding:6px 14px;border:1px solid var(--border2);border-radius:var(--r);
+  color:var(--muted);text-decoration:none;font-size:13px;font-weight:500;
+  transition:all .15s;
+}
+.nav-gh:hover{border-color:var(--green);color:var(--green)}
+
+/* ── LAYOUT ── */
+.page{padding-top:var(--nav-h);min-height:100vh}
+.wrap{max-width:1040px;margin:0 auto;padding:0 40px}
+
+/* ── TYPE SCALE ── */
+h1{font-size:clamp(32px,4vw,52px);font-weight:700;letter-spacing:-0.03em;line-height:1.1;color:var(--text)}
+h2{font-size:clamp(22px,2.5vw,32px);font-weight:600;letter-spacing:-0.025em;line-height:1.2;color:var(--text)}
+h3{font-size:18px;font-weight:600;letter-spacing:-0.015em;line-height:1.3;color:var(--text)}
+p{color:var(--muted);font-weight:400;line-height:1.7}
+
+/* ── EYEBROW LABEL ── */
+.eyebrow{
+  font-size:11px;font-weight:500;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--green);
+  display:flex;align-items:center;gap:8px;margin-bottom:14px;
+}
+.eyebrow::before{content:'//';color:var(--dim);font-weight:300;letter-spacing:0}
+
+/* ── TERMINAL ── */
+.term{
+  background:#08080F;border:1px solid var(--border);
+  border-radius:8px;overflow:hidden;font-family:var(--code);
+}
+.term-bar{
+  display:flex;align-items:center;gap:6px;padding:10px 14px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+}
+.dot{width:11px;height:11px;border-radius:50%;flex-shrink:0}
+.dr{background:#FF5F57}.dy{background:#FEBC2E}.dg{background:#28C840}
+.term-title{
+  margin-left:8px;font-size:11px;font-weight:400;
+  color:var(--dim);font-family:var(--ui);flex:1;text-align:center;
+}
+.term-body{padding:20px 22px;font-size:13px}
+.ps1{color:var(--green);user-select:none;margin-right:8px;font-weight:400}
+.tc{color:var(--text);font-weight:500}   /* command — weight 500 = action */
+.to{color:var(--muted);font-weight:400}  /* output  — weight 400 = data   */
+.tok{color:var(--green);font-weight:400}
+.tw{color:var(--amber);font-weight:400}
+.tb{color:var(--blue);font-weight:400}
+.td{color:var(--dim);font-weight:300}    /* timestamps — weight 300 = least important */
+.kw{color:var(--amber);font-weight:500}
+.kwb{color:var(--blue);font-weight:400}
+
+/* ── COPY BUTTON ── */
+.copy-btn{
+  background:none;border:1px solid var(--border2);
+  color:var(--muted);font-family:var(--ui);
+  font-size:12px;font-weight:500;letter-spacing:0.04em;
+  padding:5px 12px;border-radius:var(--r);
+  cursor:pointer;transition:all .15s;
+}
+.copy-btn:hover{border-color:var(--green);color:var(--green)}
+.copy-btn.ok{border-color:var(--green);color:var(--green);background:rgba(61,214,140,0.07)}
+
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:var(--r);
+  font-family:var(--ui);font-size:14px;font-weight:500;
+  cursor:pointer;text-decoration:none;transition:all .15s;border:none;
+}
+.btn-primary{background:var(--green);color:#0C0C0E}
+.btn-primary:hover{background:var(--green-d)}
+.btn-ghost{background:none;border:1px solid var(--border2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--text);color:var(--text)}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:22px;
+  transition:border-color .2s;position:relative;overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;left:0;top:0;bottom:0;width:2px;
+  background:var(--green);opacity:0;transition:opacity .2s;
+}
+.card:hover{border-color:var(--border2)}
+.card:hover::before{opacity:1}
+
+/* ── BADGE ── */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:4px 11px;border:1px solid var(--border2);border-radius:20px;
+  font-size:12px;font-weight:400;color:var(--muted);background:var(--surface);
+}
+.bdot{
+  width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+/* ── STATUS CHIPS ── */
+.chip{
+  display:inline-block;font-size:11px;font-weight:500;
+  letter-spacing:0.04em;padding:2px 7px;border-radius:3px;
+}
+.chip-ok  {background:rgba(61,214,140,.1);color:var(--green);border:1px solid rgba(61,214,140,.2)}
+.chip-w   {background:rgba(232,168,56,.1);color:var(--amber);border:1px solid rgba(232,168,56,.2)}
+.chip-bad {background:rgba(240,107,107,.1);color:var(--red);border:1px solid rgba(240,107,107,.2)}
+.chip-b   {background:rgba(91,156,246,.1);color:var(--blue);border:1px solid rgba(91,156,246,.2)}
+
+/* ── DIVIDER ── */
+hr{border:none;border-top:1px solid var(--border);margin:64px 0}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);padding:28px 40px;
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1040px;margin:0 auto;
+}
+footer p{font-size:13px;font-weight:400;color:var(--dim);margin:0}
+footer a{color:var(--dim);text-decoration:none;font-weight:500;transition:color .15s}
+footer a:hover{color:var(--green)}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--surface);border:1px solid var(--green-d);
+  color:var(--green);padding:10px 18px;font-size:13px;font-weight:500;
+  border-radius:var(--r);opacity:0;transform:translateY(4px);
+  transition:all .18s;pointer-events:none;z-index:9999;font-family:var(--ui);
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ── ANIMATIONS ── */
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.u{animation:up .4s ease both}
+.u1{animation-delay:.07s}.u2{animation-delay:.14s}
+.u3{animation-delay:.21s}.u4{animation-delay:.28s}
+
+/* ── MOBILE ── */
+@media(max-width:700px){
+  nav{padding:0 20px}
+  .wrap{padding:0 20px}
+  .hide-m{display:none}
+  footer{flex-direction:column;gap:8px;text-align:center;padding:24px 20px}
+}
+
+
+.ph{padding:72px 40px 56px;max-width:1040px;margin:0 auto;border-bottom:1px solid var(--border)}
+/* Page h1 — 700 weight, used once per page */
+.ph h1{margin:12px 0 10px}
+/* Page subtitle — 400 weight, body text */
+.ph p{font-size:16px;max-width:520px}
+
+.feat-section{max-width:1040px;margin:0 auto;padding:0 40px 80px}
+
+.feat-row{
+  display:grid;grid-template-columns:1fr 1fr;gap:64px;
+  align-items:start;padding:60px 0;border-bottom:1px solid var(--border);
+}
+.feat-row:last-child{border-bottom:none}
+.feat-row.rev{direction:rtl}
+.feat-row.rev>*{direction:ltr}
+
+/* Feature number — 300 weight. It's decoration, not information */
+.feat-num{font-size:64px;font-weight:300;color:var(--border2);letter-spacing:-0.04em;line-height:1;font-variant-numeric:tabular-nums}
+/* Feature heading — 600 weight */
+.feat-row h2{margin:10px 0 12px;font-size:clamp(20px,2vw,28px)}
+/* Feature body — 400 weight, generous line-height for readability */
+.feat-row p{font-size:14px;line-height:1.75;margin-bottom:16px}
+
+/* Bullet list — 400 weight */
+.bullets{list-style:none;display:flex;flex-direction:column;gap:7px}
+.bullets li{font-size:13px;font-weight:400;color:var(--muted);display:flex;gap:9px;align-items:flex-start}
+.bullets li::before{content:'→';color:var(--green);flex-shrink:0;font-weight:400}
+
+/* Feature visual panels */
+.feat-visual{background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.fv-head{
+  padding:10px 14px;background:var(--bg);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:7px;
+}
+/* Visual header — 500 weight (UI label) */
+.fv-head span{font-size:12px;font-weight:500;color:var(--muted);font-family:var(--ui)}
+.fv-head code{font-size:12px;font-weight:400;color:var(--dim);font-family:var(--code)}
+.fv-body{padding:16px}
+
+/* Table in visual — 400 weight for data rows */
+.hw-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.hw-row:last-child{border-bottom:none}
+.hw-row .k{font-weight:500;color:var(--muted);font-size:12px}
+.hw-row .v{font-family:var(--code);font-weight:400;color:var(--text);font-size:12px}
+
+/* Rule engine rows */
+.rule-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rule-row:last-child{border-bottom:none}
+.rule-row .rn{flex:1;font-weight:500;color:var(--text);font-family:var(--code);font-size:12px}
+.rule-row .reason{font-size:11px;font-weight:400;color:var(--dim);font-family:var(--ui)}
+
+/* State machine steps */
+.sm-step{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.sm-step:last-child{border-bottom:none}
+.sm-num{
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:500;
+  border:1px solid var(--border2);color:var(--dim);background:var(--surface2);
+}
+.sm-num.done{background:rgba(61,214,140,.12);border-color:var(--green-d);color:var(--green)}
+.sm-num.active{background:rgba(232,168,56,.12);border-color:var(--amber);color:var(--amber)}
+.sm-label{font-size:13px;font-weight:500;color:var(--text);line-height:1}
+.sm-sub{font-size:11px;font-weight:400;color:var(--dim);margin-top:3px}
+
+/* Log lines */
+.log-line{font-family:var(--code);font-size:12px;font-weight:400;padding:2px 0;display:flex;gap:9px;color:var(--muted)}
+.log-ts{color:var(--dim);font-weight:300}  /* timestamp = 300 */
+.log-ok{color:var(--green)}.log-w{color:var(--amber)}.log-b{color:var(--blue)}
+
+/* Mini grid */
+.mini-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:24px}
+.mini-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px}
+/* Icon — decorative, no semantic weight */
+.mini-icon{font-size:18px;margin-bottom:10px}
+.mini-card h3{font-size:14px;margin-bottom:6px}
+.mini-card p{font-size:13px;line-height:1.65}
+
+@media(max-width:840px){
+  .ph,.feat-section{padding-left:20px;padding-right:20px}
+  .feat-row{grid-template-columns:1fr;gap:28px}
+  .feat-row.rev{direction:ltr}
+  .mini-grid{grid-template-columns:1fr}
+}
+
+</style>
+</head>
+<body>
+<div id="nav-mount"></div>
+<div class="page">
+
+  <div class="ph u">
+    <div class="eyebrow">features</div>
+    <h1>Built by people who hate<br>configuring servers manually.</h1>
+    <p>Every feature exists because someone did it by hand once and thought "there must be a better way." There is. It's this.</p>
+  </div>
+
+  <section class="feat-section">
+
+    <!-- 01 Hardware Detection -->
+    <div class="feat-row u">
+      <div>
+        <div class="feat-num">01</div>
+        <div class="eyebrow">hardware intelligence</div>
+        <h2>Knows your machine before it touches it.</h2>
+        <p>Before installing a single package, the script reads everything about your server — CPU cores, available RAM, disk type (NVMe / SSD / HDD), GPU model, and battery. Then it decides what's safe.</p>
+        <ul class="bullets">
+          <li>CPU model, cores, threads, architecture (x86_64 / ARM)</li>
+          <li>RAM total and available, swap size and current usage</li>
+          <li>Disk type via sysfs rotational flag</li>
+          <li>GPU via lspci for AI and media server recommendations</li>
+          <li>Battery detected → TLP auto-selected for laptop power management</li>
+        </ul>
+      </div>
+      <div class="feat-visual">
+        <div class="fv-head"><code>$ detect_hardware</code></div>
+        <div class="fv-body">
+          <div class="hw-row"><span class="k">CPU</span><span class="v">Intel Core i7-12700K</span><span class="chip chip-ok">HIGH</span></div>
+          <div class="hw-row"><span class="k">Cores</span><span class="v">12 cores / 20 threads</span><span class="chip chip-ok">✓</span></div>
+          <div class="hw-row"><span class="k">RAM</span><span class="v">32.0 GB / 28.4 avail</span><span class="chip chip-ok">✓</span></div>
+          <div class="hw-row"><span class="k">Swap</span><span class="v">4.0 GB</span><span class="chip chip-ok">✓</span></div>
+          <div class="hw-row"><span class="k">Disk</span><span class="v">NVMe — 480 GB free</span><span class="chip chip-ok">✓</span></div>
+          <div class="hw-row"><span class="k">GPU</span><span class="v">NVIDIA RTX 3070</span><span class="chip chip-b">GPU</span></div>
+          <div class="hw-row"><span class="k">Battery</span><span class="v">none</span><span style="color:var(--dim);font-size:12px">–</span></div>
+          <div style="margin-top:12px;background:rgba(61,214,140,.06);border:1px solid rgba(61,214,140,.15);border-radius:3px;padding:8px 10px;display:flex;justify-content:space-between">
+            <span style="font-size:12px;font-weight:500;color:var(--muted)">Profile assigned</span>
+            <span style="font-size:13px;font-weight:600;color:var(--green)">HIGH</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 Rule Engine -->
+    <div class="feat-row rev u u1">
+      <div>
+        <div class="feat-num">02</div>
+        <div class="eyebrow">rule engine</div>
+        <h2>Blocks mistakes before you make them.</h2>
+        <p>Every component has minimum requirements — RAM, CPU cores, disk space, and whether it tolerates spinning rust. The engine evaluates each one against your hardware and gates it. No accidental k8s on 512 MB RAM.</p>
+        <ul class="bullets">
+          <li>LOW: CLI tools only — DBs and Docker blocked</li>
+          <li>MEDIUM: Docker + single container, warns on MySQL/PostgreSQL</li>
+          <li>HIGH: full stack including Kubernetes and media servers</li>
+          <li>HDD detected → warns before any database or transcoding install</li>
+          <li>All gates overridable with --force if you're sure</li>
+        </ul>
+      </div>
+      <div class="feat-visual">
+        <div class="fv-head"><code>$ apply_rule_engine — MEDIUM</code></div>
+        <div class="fv-body">
+          <div class="rule-row"><span class="chip chip-ok">OK</span><span class="rn">ufw</span></div>
+          <div class="rule-row"><span class="chip chip-ok">OK</span><span class="rn">docker</span></div>
+          <div class="rule-row"><span class="chip chip-ok">OK</span><span class="rn">nginx</span></div>
+          <div class="rule-row"><span class="chip chip-ok">OK</span><span class="rn">sqlite</span></div>
+          <div class="rule-row"><span class="chip chip-w">WARN</span><span class="rn">mysql</span><span class="reason">RAM below threshold</span></div>
+          <div class="rule-row"><span class="chip chip-bad">BLOCKED</span><span class="rn">k3s</span><span class="reason">needs ≥ 4 GB</span></div>
+          <div class="rule-row"><span class="chip chip-bad">BLOCKED</span><span class="rn">jellyfin</span><span class="reason">needs ≥ 4 cores</span></div>
+          <div class="rule-row"><span class="chip chip-bad">BLOCKED</span><span class="rn">grafana_prometheus</span><span class="reason">RAM &lt; 4 GB</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 State Machine -->
+    <div class="feat-row u u1">
+      <div>
+        <div class="feat-num">03</div>
+        <div class="eyebrow">execution order</div>
+        <h2>Installs in the right order. Every time.</h2>
+        <p>A 7-phase state machine ensures base hardening always runs first, containers before the apps that need them, databases before web apps that depend on a backend.</p>
+        <ul class="bullets">
+          <li>Phase 1: Pre-flight checks and config backups</li>
+          <li>Phase 2: Base hardening — UFW, SSH, fail2ban, etckeeper</li>
+          <li>Phase 3: Container runtimes — Docker, Podman</li>
+          <li>Phase 4: Databases — before anything that depends on them</li>
+          <li>Phases 5–7: Web servers, services, post-install hooks</li>
+        </ul>
+      </div>
+      <div class="feat-visual">
+        <div class="fv-head"><code>$ run_installations</code></div>
+        <div class="fv-body">
+          <div class="sm-step"><div class="sm-num done">✓</div><div><div class="sm-label">Pre-flight</div><div class="sm-sub">root check · pkg update · backups</div></div></div>
+          <div class="sm-step"><div class="sm-num done">✓</div><div><div class="sm-label">Base hardening</div><div class="sm-sub">ufw · ssh · fail2ban · etckeeper</div></div></div>
+          <div class="sm-step"><div class="sm-num done">✓</div><div><div class="sm-label">Containers</div><div class="sm-sub">docker · docker-compose</div></div></div>
+          <div class="sm-step"><div class="sm-num done">✓</div><div><div class="sm-label">Databases</div><div class="sm-sub">postgresql · redis</div></div></div>
+          <div class="sm-step"><div class="sm-num active">→</div><div><div class="sm-label" style="color:var(--amber)">Web servers</div><div class="sm-sub">installing nginx…</div></div></div>
+          <div class="sm-step"><div class="sm-num">6</div><div><div class="sm-label" style="color:var(--dim)">Services</div><div class="sm-sub">uptime-kuma · borg · wireguard</div></div></div>
+          <div class="sm-step"><div class="sm-num">7</div><div><div class="sm-label" style="color:var(--dim)">Post-install</div><div class="sm-sub">enable services · credentials · reboot?</div></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 04 Rollback -->
+    <div class="feat-row rev u u1">
+      <div>
+        <div class="feat-num">04</div>
+        <div class="eyebrow">safety &amp; rollback</div>
+        <h2>Run it twice. Nothing explodes.</h2>
+        <p>State files in <code style="font-family:var(--code);font-size:13px;color:var(--green)">/var/lib/bashonacci/</code> track what's already done. etckeeper snapshots <code style="font-family:var(--code);font-size:13px;color:var(--green)">/etc</code> before every change. Roll back any single component if something goes wrong.</p>
+        <ul class="bullets">
+          <li>State files prevent duplicate installs across runs</li>
+          <li>etckeeper git-commits /etc before each component</li>
+          <li>--rollback &lt;name&gt; purges any single component cleanly</li>
+          <li>Existing configs never overwritten without --force</li>
+          <li>Full log at /var/log/ plus timestamped copy in ~/</li>
+        </ul>
+        <button class="copy-btn" data-copy="rollback" style="margin-top:16px">COPY ROLLBACK COMMAND</button>
+      </div>
+      <div class="feat-visual">
+        <div class="fv-head"><code>$ tail -f /var/log/ubuntu-auto-setup.log</code></div>
+        <div class="fv-body">
+          <div class="log-line"><span class="log-ts">17:42:01</span><span class="log-ok">[INFO]</span><span>etckeeper: snapshotting /etc</span></div>
+          <div class="log-line"><span class="log-ts">17:42:01</span><span class="log-b">[STEP]</span><span>Installing Docker</span></div>
+          <div class="log-line"><span class="log-ts">17:42:18</span><span class="log-ok">[INFO]</span><span>Docker installed. State saved.</span></div>
+          <div class="log-line" style="margin-top:8px"><span class="log-ts">17:58:02</span><span class="log-w">[STEP]</span><span style="color:var(--amber)">Rolling back: docker</span></div>
+          <div class="log-line"><span class="log-ts">17:58:02</span><span class="log-ok">[CMD]</span><span>apt-get purge docker-ce …</span></div>
+          <div class="log-line"><span class="log-ts">17:58:07</span><span class="log-ok">[INFO]</span><span>Rollback complete.</span></div>
+          <div class="log-line"><span class="log-ts">17:58:07</span><span class="log-ok">[INFO]</span><span>etckeeper: Rollback: docker</span></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- MINI FEATURES -->
+  <section style="max-width:1040px;margin:0 auto;padding:0 40px 80px">
+    <div class="eyebrow">also</div>
+    <h2>More things it does.</h2>
+    <p style="margin-top:8px">The smaller details that still matter.</p>
+    <div class="mini-grid">
+      <div class="mini-card"><div class="mini-icon">⚑</div><h3>Port conflict detection</h3><p>Checks 80, 443, 3306, 5432 before installing anything that needs them. Skips with a warning, not a crash.</p></div>
+      <div class="mini-card"><div class="mini-icon">🔐</div><h3>Credential logging</h3><p>Auto-generated passwords are written to a timestamped log in ~/ — never lost, never printed to stdout where they'd scroll past.</p></div>
+      <div class="mini-card"><div class="mini-icon">🔒</div><h3>Single-instance lock</h3><p>Creates a PID lock file so two concurrent runs can't fight over the same system. Second one exits cleanly.</p></div>
+      <div class="mini-card"><div class="mini-icon">🧱</div><h3>Non-Ubuntu abort</h3><p>Reads /etc/os-release and hard-aborts if it's not Ubuntu ≥ 20.04. No silent breakage on Debian or CentOS.</p></div>
+      <div class="mini-card"><div class="mini-icon">⚡</div><h3>Laptop mode</h3><p>Battery detected → TLP automatically added. Suspend and power-save tuning without asking.</p></div>
+      <div class="mini-card"><div class="mini-icon">🧩</div><h3>YAML-extensible</h3><p>Adding a new component means editing exactly one array. The install loop, rule engine, and rollback all work automatically.</p></div>
+    </div>
+  </section>
+
+  <hr style="max-width:1040px;margin:0 auto">
+  <footer>
+    <p>bashonacci.sh · MIT License</p>
+    <div style="display:flex;gap:20px"><a href="index.html">← home</a><a href="components.html">components →</a></div>
+  </footer>
+
+</div>
+<div id="toast"></div>
+<script>
+(function(){
+  const h=`<nav>
+  <a class="nav-logo" href="index.html">
+    <span class="logo-mark">$_</span>
+    <span class="logo-name">bashonacci<span>.sh</span></span>
+  </a>
+  <ul class="nav-links">
+    <li class="hide-m"><a href="features.html">Features <span class="kbd">F</span></a></li>
+    <li class="hide-m"><a href="components.html">Components <span class="kbd">C</span></a></li>
+    <li class="hide-m"><a href="how-it-works.html">How It Works <span class="kbd">H</span></a></li>
+    <li><a href="https://github.com/YOUR_USERNAME/bashonacci" target="_blank" class="nav-gh">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.44 9.8 8.2 11.38.6.11.82-.26.82-.57v-2c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.74.08-.73.08-.73 1.2.09 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.49 1 .11-.78.42-1.3.76-1.6-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.14-.3-.54-1.52.1-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 3-.4c1.02 0 2.04.14 3 .4 2.28-1.55 3.29-1.23 3.29-1.23.64 1.66.24 2.88.12 3.18.77.84 1.23 1.91 1.23 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .31.21.69.82.57C20.56 21.8 24 17.3 24 12 24 5.37 18.63 0 12 0z"/>
+      </svg>GitHub</a></li>
+  </ul></nav>`;
+  const m=document.getElementById('nav-mount');
+  if(m)m.outerHTML=h;
+})();
+</script>
+<script>
+const SCRIPT_URL='https://ubuntu-autosetup.pages.dev/setup.sh';
+const CMDS={
+  auto:`curl -fsSL ${SCRIPT_URL} | sudo bash -s -- --auto`,
+  interactive:`curl -fsSL ${SCRIPT_URL} | sudo bash -s -- --interactive`,
+  config:`curl -fsSL ${SCRIPT_URL} -o setup.sh && sudo bash setup.sh --config myserver.yml`,
+  rollback:`sudo bash setup.sh --rollback docker`,
+  list:`sudo bash setup.sh --list`,
+};
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('[data-url]').forEach(el=>el.textContent=SCRIPT_URL);
+  document.querySelectorAll('[data-cmd]').forEach(el=>{const k=el.dataset.cmd;if(CMDS[k])el.textContent=CMDS[k]});
+  const path=location.pathname.replace(/\/$/,'')||'/index.html';
+  document.querySelectorAll('.nav-links a').forEach(a=>{
+    const href=a.getAttribute('href').replace(/\/$/,'');
+    if(path.endsWith(href)||(path===''&&href==='index.html'))a.classList.add('active');
+  });
+});
+function showToast(m='✓ Copied'){
+  const t=document.getElementById('toast');if(!t)return;
+  t.textContent=m;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+function copyCmd(key){
+  const text=CMDS[key]||key;
+  navigator.clipboard.writeText(text).catch(()=>{
+    const ta=Object.assign(document.createElement('textarea'),{value:text,style:'position:fixed;opacity:0'});
+    document.body.append(ta);ta.select();document.execCommand('copy');ta.remove();
+  });
+  showToast('✓ Copied to clipboard');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('[data-copy]').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      copyCmd(btn.dataset.copy);
+      const o=btn.textContent;btn.textContent='COPIED!';btn.classList.add('ok');
+      setTimeout(()=>{btn.textContent=o;btn.classList.remove('ok')},1800);
+    });
+  });
+});
+</script>
+</body>
+
